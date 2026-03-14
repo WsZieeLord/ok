@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Premium | Private Menu</title>
+    <style>
+        /* --- CSS: GIAO DIỆN GLASSMORPHISM --- */
+        :root {
+            --bg-color: #050510;
+            --glass-bg: rgba(15, 20, 35, 0.85);
+            --glass-border: rgba(0, 255, 255, 0.2);
+            --accent: #00e5ff; /* Cyan Glow */
+            --accent-dim: rgba(0, 229, 255, 0.15);
+            --text-main: #ffffff;
+            --text-dim: #8b92a5;
+            --card-bg: rgba(10, 15, 30, 0.6);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background: #111 url('https://w.wallhaven.cc/full/85/wallhaven-85869y.jpg') no-repeat center center/cover;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Khung Panel Chính */
+        #main-panel {
+            display: flex;
+            width: 820px;
+            height: 520px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        /* Trạng thái ẩn của Menu */
+        .panel-hidden {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            pointer-events: none;
+        }
+
+        /* Sidebar bên trái */
+        .sidebar {
+            width: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            padding: 25px 15px;
+        }
+
+        .brand h1 { color: var(--text-main); font-size: 20px; letter-spacing: 3px; text-shadow: 0 0 10px var(--accent); }
+        .brand span { color: var(--accent); font-size: 10px; font-weight: bold; }
+
+        nav { margin-top: 40px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+
+        .nav-btn {
+            background: transparent; border: none; color: var(--text-dim);
+            text-align: left; padding: 12px 15px; font-size: 13px;
+            border-radius: 6px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-main); }
+        .nav-btn.active {
+            background: var(--accent-dim);
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
+            box-shadow: inset 5px 0 15px rgba(0, 229, 255, 0.1);
+        }
+
+        /* Nội dung chính bên phải */
+        .content-area { flex: 1; padding: 30px; overflow-y: auto; color: var(--text-main); }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: var(--card-bg); border-radius: 8px; padding: 18px; border: 1px solid rgba(255, 255, 255, 0.03); }
+        .card h3 { font-size: 11px; text-transform: uppercase; color: var(--accent); margin-bottom: 15px; letter-spacing: 1px; }
+
+        /* UI Controls */
+        .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 13px; }
+
+        /* Switch Toggle */
+        .switch { position: relative; width: 34px; height: 18px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #1a1f33; transition: .3s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background: var(--text-dim); transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background: rgba(0, 229, 255, 0.3); }
+        input:checked + .slider:before { transform: translateX(16px); background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+        /* Range Slider */
+        input[type="range"] { -webkit-appearance: none; width: 80px; height: 3px; background: #1a1f33; border-radius: 5px; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; cursor: pointer; box-shadow: 0 0 5px var(--accent); }
+
+        .btn-keybind { background: #1a1f33; border: 1px solid var(--glass-border); color: var(--accent); padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; min-width: 60px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div id="main-panel">
+    <aside class="sidebar">
+        <div class="brand">
+            <h1>GEMINI</h1>
+            <span>PRIVATE ACCESS</span>
+        </div>
+        <nav>
+            <button class="nav-btn active" onclick="showTab(event, 'legit')">🎯 Legitbot</button>
+            <button class="nav-btn" onclick="showTab(event, 'rage')">💀 Ragebot</button>
+            <button class="nav-btn" onclick="showTab(event, 'visuals')">👁️ Visuals</button>
+            <button class="nav-btn" onclick="showTab(event, 'misc')">⚙️ Misc</button>
+        </nav>
+    </aside>
+
+    <main class="content-area">
+        <div id="legit" class="tab-content active">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Aimbot</h3>
+                    <div class="setting-item"><span>Enabled</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+                    <div class="setting-item"><span>Field of View</span><input type="range" min="1" max="180" value="15"></div>
+                    <div class="setting-item"><span>Smoothing</span><input type="range" min="1" max="30" value="8"></div>
+                </div>
+                <div class="card">
+                    <h3>Triggerbot</h3>
+                    <div class="setting-item"><span>Enabled</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+                    <div class="setting-item"><span>Delay (ms)</span><input type="range" min="0" max="500" value="20"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="visuals" class="tab-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>ESP Main</h3>
+                    <div class="setting-item"><span>Box ESP</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+                    <div class="setting-item"><span>Health Bar</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+                    <div class="setting-item"><span>Snap Lines</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+                </div>
+                <div class="card">
+                    <h3>World</h3>
+                    <div class="setting-item"><span>Night Mode</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+                    <div class="setting-item"><span>Sky Color</span><button class="btn-keybind">Pick</button></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="misc" class="tab-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>System Settings</h3>
+                    <div class="setting-item">
+                        <span>Menu Keybind</span>
+                        <button class="btn-keybind" id="keybind-btn">INSERT</button>
+                    </div>
+                    <div class="setting-item"><span>Discord RPC</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // --- CHUYỂN TAB ---
+    function showTab(e, tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        e.currentTarget.classList.add('active');
+    }
+
+    // --- LOGIC KEYBIND & TOGGLE MENU ---
+    let menuOpen = true;
+    let currentBind = 'Insert';
+    let isBinding = false;
+    const panel = document.getElementById('main-panel');
+    const bindBtn = document.getElementById('keybind-btn');
+
+    // Lắng nghe phím bấm
+    document.addEventListener('keydown', (e) => {
+        // Chế độ gán phím mới
+        if (isBinding) {
+            currentBind = e.key;
+            bindBtn.innerText = currentBind.toUpperCase();
+            bindBtn.style.color = 'var(--accent)';
+            isBinding = false;
+            return;
+        }
+
+        // Bật/Tắt Menu
+        if (e.key.toLowerCase() === currentBind.toLowerCase()) {
+            menuOpen = !menuOpen;
+            if (menuOpen) {
+                panel.classList.remove('panel-hidden');
+            } else {
+                panel.classList.add('panel-hidden');
+            }
+        }
+    });
+
+    // Khi bấm vào nút gán phím
+    bindBtn.addEventListener('click', () => {
+        isBinding = true;
+        bindBtn.innerText = '...';
+        bindBtn.style.color = '#fff';
+    });
+</script>
+
+</body>
+</html>
+
